@@ -1,0 +1,601 @@
+<!doctype html>
+<html lang="uk">
+    <head>
+        <meta charset="UTF-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+        />
+        <meta name="theme-color" content="#f06292" />
+        <title>Мобільні рахунки</title>
+
+        <!-- Бібліотеки -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+        <!-- Стилі -->
+        <link rel="stylesheet" href="css/style.css" />
+
+        <!-- PWA -->
+        <link rel="manifest" href="manifest.json" />
+    </head>
+    <body>
+        <!-- СТОРІНКИ -->
+        <div id="home" class="page active">
+            <div class="stats-grid" id="stats-container">
+                <div class="stat-card">
+                    <div class="stat-number" id="stat-stock-qty">0</div>
+                    <div class="stat-label">Товарів на складі (шт)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="stat-stock-types">0</div>
+                    <div class="stat-label">Найменувань</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="stat-customers">0</div>
+                    <div class="stat-label">Покупців</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="stat-invoices">0</div>
+                    <div class="stat-label">Рахунків</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="flex-between">
+                    <h2>➕ Новий рахунок</h2>
+                    <button class="btn" id="newInvoiceBtn">Створити</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>📄 Останні рахунки</h2>
+                <div id="recent-invoices"></div>
+            </div>
+        </div>
+
+        <div id="stock" class="page">
+            <div class="card">
+                <div class="flex-between">
+                    <h2>📦 Товари на складі</h2>
+                    <button class="btn btn-sm" id="addStockBtn">
+                        + Додати
+                    </button>
+                </div>
+                <div class="search-box">
+                    <input
+                        type="text"
+                        id="stock-search"
+                        placeholder="🔍 Пошук товару..."
+                    />
+                </div>
+                <div id="stock-list"></div>
+            </div>
+        </div>
+
+        <div id="customers" class="page">
+            <div class="card">
+                <div class="flex-between">
+                    <h2>👥 Покупці</h2>
+                    <button class="btn btn-sm" id="addCustomerBtn">
+                        + Додати
+                    </button>
+                </div>
+                <div class="search-box">
+                    <input
+                        type="text"
+                        id="customer-search"
+                        placeholder="🔍 Пошук покупця..."
+                    />
+                </div>
+                <div id="customers-list"></div>
+            </div>
+        </div>
+
+        <div id="profile" class="page">
+            <div class="card">
+                <h2>👤 Профіль продавця</h2>
+                <form id="profile-form">
+                    <div class="form-group">
+                        <label>Вид діяльності</label>
+                        <input
+                            type="text"
+                            id="profile-type"
+                            placeholder="ФОП, ПП, ГО, ТОВ..."
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label>П.І.Б.</label>
+                        <input
+                            type="text"
+                            id="profile-name"
+                            placeholder="П.І.Б. / Назва організації"
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label>Поштовий індекс</label>
+                        <input
+                            type="text"
+                            id="profile-index"
+                            placeholder="Код"
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label>Населений пункт</label>
+                        <input
+                            type="text"
+                            id="profile-city"
+                            placeholder="Назва населеного пункту"
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label>Вулиця</label>
+                        <input
+                            type="text"
+                            id="profile-street"
+                            placeholder="Назва вулиці"
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label>Номер будинку</label>
+                        <input
+                            type="text"
+                            id="profile-house"
+                            placeholder="Номер будинку"
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label>Область</label>
+                        <input
+                            type="text"
+                            id="profile-region"
+                            placeholder="Область"
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label>Країна</label>
+                        <input
+                            type="text"
+                            id="profile-country"
+                            placeholder="Україна"
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label>РНОКПП/ЄДРПОУ</label>
+                        <input
+                            type="text"
+                            id="profile-edrpou"
+                            placeholder="Код"
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label>IBAN</label>
+                        <input
+                            type="text"
+                            id="profile-iban"
+                            placeholder="Код"
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label>Банк</label>
+                        <input
+                            type="text"
+                            id="profile-bank"
+                            placeholder="Назва банку"
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label>МФО</label>
+                        <input type="text" id="profile-mfo" placeholder="Код" />
+                    </div>
+                    <div class="form-group">
+                        <label>Телефон</label>
+                        <input
+                            type="text"
+                            id="profile-phone"
+                            placeholder="Мобільний телефон"
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label>🖊️ Підпис (PNG файл)</label>
+                        <div
+                            style="
+                                display: flex;
+                                flex-wrap: wrap;
+                                gap: 10px;
+                                align-items: center;
+                                margin-bottom: 10px;
+                            "
+                        >
+                            <label
+                                class="btn btn-sm btn-outline"
+                                style="cursor: pointer"
+                            >
+                                📁 Вибрати підпис
+                                <input
+                                    type="file"
+                                    id="signature-input"
+                                    accept="image/png"
+                                    style="display: none"
+                                />
+                            </label>
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-danger"
+                                id="delete-signature-btn"
+                            >
+                                🗑️ Видалити підпис
+                            </button>
+                        </div>
+                        <div
+                            id="signature-preview"
+                            style="
+                                margin-top: 8px;
+                                font-size: 12px;
+                                color: #999;
+                            "
+                        ></div>
+                        <div
+                            style="
+                                font-size: 11px;
+                                color: #999;
+                                margin-top: 4px;
+                            "
+                        >
+                            PNG файл з прозорим фоном, розміром ~150×50 пікселів
+                        </div>
+                    </div>
+                    <button type="button" class="btn" id="saveProfileBtn">
+                        💾 Зберегти
+                    </button>
+                </form>
+
+                <!-- Секція: Резервне копіювання -->
+                <div
+                    style="
+                        margin-top: 24px;
+                        padding-top: 16px;
+                        border-top: 1px solid #f0e6e0;
+                    "
+                >
+                    <h3 style="color: #7b1fa2; margin-bottom: 12px">
+                        💾 Резервне копіювання
+                    </h3>
+
+                    <div style="margin-bottom: 16px">
+                        <div
+                            style="
+                                font-size: 13px;
+                                color: #7b1fa2;
+                                margin-bottom: 8px;
+                                font-weight: 500;
+                            "
+                        >
+                            📤 Експорт:
+                        </div>
+                        <div style="display: flex; flex-wrap: wrap; gap: 8px">
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-outline"
+                                id="exportProfileBtn"
+                            >
+                                Профіль
+                            </button>
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-outline"
+                                id="exportStockBtn"
+                            >
+                                Товари
+                            </button>
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-outline"
+                                id="exportCustomersBtn"
+                            >
+                                Покупці
+                            </button>
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-outline"
+                                id="exportInvoicesBtn"
+                            >
+                                Рахунки
+                            </button>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 16px">
+                        <div
+                            style="
+                                font-size: 13px;
+                                color: #7b1fa2;
+                                margin-bottom: 8px;
+                                font-weight: 500;
+                            "
+                        >
+                            📥 Імпорт:
+                        </div>
+                        <div
+                            style="
+                                display: flex;
+                                flex-wrap: wrap;
+                                gap: 8px;
+                                align-items: center;
+                            "
+                        >
+                            <label
+                                class="btn btn-sm btn-outline"
+                                style="display: inline-block; cursor: pointer"
+                            >
+                                Обрати JSON файл
+                                <input
+                                    type="file"
+                                    id="import-file-input"
+                                    accept=".json"
+                                    style="display: none"
+                                />
+                            </label>
+                            <span style="font-size: 12px; color: #999"
+                                >(авто-визначення типу)</span
+                            >
+                        </div>
+                    </div>
+
+                    <div
+                        style="
+                            margin-top: 16px;
+                            padding-top: 16px;
+                            border-top: 1px solid #f0e6e0;
+                        "
+                    >
+                        <div
+                            style="
+                                font-size: 13px;
+                                color: #f44336;
+                                margin-bottom: 8px;
+                                font-weight: 500;
+                            "
+                        >
+                            ⚠️ Небезпечна зона:
+                        </div>
+                        <button
+                            type="button"
+                            class="btn btn-sm btn-danger"
+                            id="clearAllDataBtn"
+                        >
+                            🗑️ Очистити всі дані
+                        </button>
+                        <div
+                            style="
+                                font-size: 11px;
+                                color: #999;
+                                margin-top: 8px;
+                            "
+                        >
+                            💡 Експортуйте дані перед очищенням. Дія НЕЗВОРОТНА!
+                        </div>
+                    </div>
+
+                    <div
+                        style="
+                            font-size: 11px;
+                            color: #999;
+                            margin-top: 12px;
+                            background: #fef7f0;
+                            padding: 8px;
+                            border-radius: 12px;
+                        "
+                    >
+                        📌 Рекомендуємо експортувати базу даних раз на місяць
+                        для безпеки даних.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- НИЖНЯ НАВІГАЦІЯ -->
+        <div class="bottom-nav">
+            <button class="nav-item active" data-page="home">
+                <span class="nav-icon">🏠</span>
+                <span>Головна</span>
+            </button>
+            <button class="nav-item" data-page="stock">
+                <span class="nav-icon">📦</span>
+                <span>Склад</span>
+            </button>
+            <button class="nav-item" data-page="customers">
+                <span class="nav-icon">👥</span>
+                <span>База</span>
+            </button>
+            <button class="nav-item" data-page="profile">
+                <span class="nav-icon">👤</span>
+                <span>Профіль</span>
+            </button>
+        </div>
+
+        <!-- ПРИХОВАНИЙ ШАБЛОН ДЛЯ PDF -->
+        <div id="pdf-template" class="pdf-template"></div>
+
+        <!-- МОДАЛЬНІ ВІКНА -->
+        <div id="invoice-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>🧾 Новий рахунок</h2>
+                    <span class="close-modal" id="closeInvoiceModal"
+                        >&times;</span
+                    >
+                </div>
+                <div id="invoice-modal-body"></div>
+            </div>
+        </div>
+
+        <div id="stock-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="stock-modal-title">➕ Додати товар</h2>
+                    <span class="close-modal" id="closeStockModal"
+                        >&times;</span
+                    >
+                </div>
+                <div>
+                    <div class="form-group">
+                        <label>Назва товару</label>
+                        <input
+                            type="text"
+                            id="stock-name"
+                            placeholder="Коротка назва"
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label>Кількість на складі</label>
+                        <input type="number" id="stock-qty" value="0" min="0" />
+                    </div>
+                    <div class="form-group">
+                        <label>Ціна за штуку (грн)</label>
+                        <input
+                            type="number"
+                            id="stock-price"
+                            value="0"
+                            min="0"
+                            step="0.01"
+                        />
+                    </div>
+                    <input type="hidden" id="stock-id" />
+                    <button class="btn" id="saveStockBtn">💾 Зберегти</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="customer-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="customer-modal-title">➕ Додати покупця</h2>
+                    <span class="close-modal" id="closeCustomerModal"
+                        >&times;</span
+                    >
+                </div>
+                <div>
+                    <div class="form-group">
+                        <label>Вид діяльності</label>
+                        <input
+                            type="text"
+                            id="customer-type"
+                            placeholder="ФОП, ПП, ГО, ТОВ..."
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label>П.І.Б. / Назва</label>
+                        <input
+                            type="text"
+                            id="customer-name"
+                            placeholder="П.І.Б. / Назва організації"
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label>Поштовий індекс</label>
+                        <input
+                            type="text"
+                            id="customer-index"
+                            placeholder="Код"
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label>Населений пункт</label>
+                        <input
+                            type="text"
+                            id="customer-city"
+                            placeholder="Назва населеного пункту"
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label>Вулиця</label>
+                        <input
+                            type="text"
+                            id="customer-street"
+                            placeholder="Назва вулиці"
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label>Номер будинку</label>
+                        <input
+                            type="text"
+                            id="customer-house"
+                            placeholder="Номер"
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label>Область</label>
+                        <input
+                            type="text"
+                            id="customer-region"
+                            placeholder="Назва області"
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label>Країна</label>
+                        <input
+                            type="text"
+                            id="customer-country"
+                            placeholder="Україна"
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label>РНОКПП/ЄДРПОУ</label>
+                        <input
+                            type="text"
+                            id="customer-edrpou"
+                            placeholder="Код"
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label>IBAN</label>
+                        <input
+                            type="text"
+                            id="customer-iban"
+                            placeholder="код IBAN"
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label>Банк</label>
+                        <input
+                            type="text"
+                            id="customer-bank"
+                            placeholder="Назва банку"
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label>МФО</label>
+                        <input
+                            type="text"
+                            id="customer-mfo"
+                            placeholder="Код"
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label>Телефон</label>
+                        <input
+                            type="text"
+                            id="customer-phone"
+                            placeholder="Мобільний"
+                        />
+                    </div>
+                    <input type="hidden" id="customer-id" />
+                    <button class="btn" id="saveCustomerBtn">
+                        💾 Зберегти
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Підключення скриптів (порядок важливий!) -->
+        <script src="js/utils.js?v=2"></script>
+        <script src="js/db.js?v=2"></script>
+        <script src="js/pdf.js?v=3"></script>
+        <script src="js/ui.js?v=2"></script>
+        <script src="js/modals.js?v=2"></script>
+        <script src="js/invoice.js?v=2"></script>
+        <script src="js/backup.js?v=2"></script>
+        <script src="js/app.js?v=2"></script>
+    </body>
+</html>
