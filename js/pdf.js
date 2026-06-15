@@ -40,7 +40,7 @@ async function generateInvoicePdf(invoice) {
   try {
     const signatureBase64 = await loadSignature();
     if (signatureBase64) {
-      signatureHtml = `<img src="${signatureBase64}" style="height: 40px; width: auto; margin: 0 10px;" alt="підпис">`;
+      signatureHtml = `<img src="${signatureBase64}" style="height: 150px; width: auto; margin: 0 10px;" alt="підпис">`;
     }
   } catch (e) {
     console.warn("Помилка завантаження підпису:", e);
