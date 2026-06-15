@@ -11,6 +11,7 @@ async function initApp() {
     renderStock();
     renderCustomers();
     renderRecentInvoices();
+    renderAllInvoices(); // Додано: відображення всіх рахунків при старті
     loadProfileToForm();
     updateStats();
 
@@ -42,6 +43,7 @@ function setupEventListeners() {
 
       if (pageId === "stock") renderStock();
       if (pageId === "customers") renderCustomers();
+      if (pageId === "all-invoices") renderAllInvoices();
       if (pageId === "home") {
         renderRecentInvoices();
         updateStats();
@@ -57,6 +59,15 @@ function setupEventListeners() {
   const customerSearch = document.getElementById("customer-search");
   if (customerSearch)
     customerSearch.addEventListener("keyup", () => renderCustomers());
+
+  // Пошук у всіх рахунках (з скиданням пагінації)
+  const allInvoicesSearch = document.getElementById("all-invoices-search");
+  if (allInvoicesSearch) {
+    allInvoicesSearch.addEventListener("keyup", () => {
+      currentPage = 1;
+      renderAllInvoices();
+    });
+  }
 
   // Кнопки модальних вікон
   document

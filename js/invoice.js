@@ -23,9 +23,16 @@ function openInvoiceModal(editInvoice = null) {
       editInvoice.number,
       editInvoice.date,
       editInvoice.discount,
+      editInvoice.hasInvoice !== false,
     );
   } else {
-    renderInvoiceModalForm(null, "", new Date().toISOString().slice(0, 10), 0);
+    renderInvoiceModalForm(
+      null,
+      "",
+      new Date().toISOString().slice(0, 10),
+      0,
+      true,
+    );
   }
   document.getElementById("invoice-modal").classList.add("active");
 }
@@ -41,6 +48,7 @@ async function renderInvoiceModalForm(
   invoiceNumber = "",
   invoiceDate = "",
   discountValue = 0,
+  hasPdf = true,
 ) {
   if (!invoiceNumber) {
     invoiceNumber = await getNextInvoiceNumber();
@@ -60,14 +68,14 @@ async function renderInvoiceModalForm(
   const itemsHtml = currentInvoiceItems
     .map(
       (item, idx) => `
-        <div class="item-row">
-            <div><strong>${escapeHtml(item.name)}</strong></div>
-            <div>Кількість: ${item.qty} шт × ${item.price} грн = ${item.qty * item.price} грн</div>
-            <div class="row-buttons">
-                <button class="btn btn-sm btn-danger" onclick="removeInvoiceItem(${idx})">Видалити</button>
-            </div>
-        </div>
-    `,
+                <div class="item-row">
+                    <div><strong>${escapeHtml(item.name)}</strong></div>
+                    <div>Кількість: ${item.qty} шт × ${item.price} грн = ${item.qty * item.price} грн</div>
+                    <div class="row-buttons">
+                        <button class="btn btn-sm btn-danger" onclick="removeInvoiceItem(${idx})">Видалити</button>
+                    </div>
+                </div>
+            `,
     )
     .join("");
 
@@ -116,9 +124,17 @@ async function renderInvoiceModalForm(
             <input type="number" id="invoice-discount" value="${discount}" min="0" max="${totalOriginal}" step="1" oninput="updateDiscountTotal()">
         </div>
         <div class="total-row"><span>Сума зі знижкою:</span><span id="total-with-discount">${totalWithDiscount.toFixed(2)} грн</span></div>
-        <div class="flex-row" style="gap: 10px; margin-top: 20px;">
-            <button class="btn" onclick="saveInvoice(false)">💾 Зберегти рахунок</button>
-            <button class="btn btn-secondary" onclick="saveInvoice(true)">📄 Зберегти та PDF</button>
+
+        <!-- Чекбокс "З квитанцією" (збільшений, ліворуч) -->
+        <div class="form-group" style="margin-top: 15px;">
+            <label style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
+                <input type="checkbox" id="invoice-has-pdf" ${hasPdf ? "checked" : ""} style="width: 20px; height: 20px; cursor: pointer;">
+                <span style="font-size: 14px;">📄 З квитанцією (PDF)</span>
+            </label>
+        </div>
+
+        <div class="flex-row" style="margin-top: 20px;">
+            <button class="btn" onclick="saveInvoice()">💾 Зберегти</button>
         </div>
     `;
 }
@@ -175,6 +191,7 @@ function addProductToInvoice() {
     document.getElementById("invoice-number")?.value || "",
     document.getElementById("invoice-date")?.value || "",
     parseFloat(document.getElementById("invoice-discount")?.value) || 0,
+    document.getElementById("invoice-has-pdf")?.checked !== false,
   );
   qtyInput.value = "";
   select.value = "";
@@ -187,10 +204,11 @@ function removeInvoiceItem(index) {
     document.getElementById("invoice-number")?.value || "",
     document.getElementById("invoice-date")?.value || "",
     parseFloat(document.getElementById("invoice-discount")?.value) || 0,
+    document.getElementById("invoice-has-pdf")?.checked !== false,
   );
 }
 
-async function saveInvoice(generatePdf = false) {
+async function saveInvoice() {
   try {
     const customerId = document.getElementById("invoice-customer")?.value;
     if (!customerId) {
@@ -226,6 +244,10 @@ async function saveInvoice(generatePdf = false) {
     if (discount > totalOriginal) discount = totalOriginal;
     const totalWithDiscount = totalOriginal - discount;
 
+    // Отримуємо стан чекбоксу
+    const generatePdf =
+      document.getElementById("invoice-has-pdf")?.checked || false;
+
     // Перевірка наявності товарів
     for (const item of currentInvoiceItems) {
       const stockItem = stockList.find((s) => s.id == item.id);
@@ -247,6 +269,7 @@ async function saveInvoice(generatePdf = false) {
       totalOriginal: totalOriginal,
       discount: discount,
       totalWithDiscount: totalWithDiscount,
+      hasInvoice: generatePdf,
     };
 
     // Списуємо товари
@@ -259,6 +282,7 @@ async function saveInvoice(generatePdf = false) {
     );
     await loadInvoicesFromDB();
     renderRecentInvoices();
+    renderAllInvoices();
     updateStats();
     closeInvoiceModal();
 
@@ -267,7 +291,10 @@ async function saveInvoice(generatePdf = false) {
         await generateInvoicePdf(invoice);
       } catch (pdfErr) {
         console.error("Помилка генерації PDF:", pdfErr);
-        alert("Рахунок збережено, але сталася помилка при створенні PDF: " + pdfErr.message);
+        alert(
+          "Рахунок збережено, але сталася помилка при створенні PDF: " +
+            pdfErr.message,
+        );
       }
     } else {
       alert("Рахунок збережено!");
@@ -293,6 +320,7 @@ window.editInvoice = async function (invoiceId) {
     invoice.number,
     invoice.date,
     invoice.discount,
+    invoice.hasInvoice !== false,
   );
   document.getElementById("invoice-modal").classList.add("active");
 };
@@ -308,6 +336,7 @@ window.deleteInvoice = async function (invoiceId) {
   await loadStockFromDB();
   renderStock();
   renderRecentInvoices();
+  renderAllInvoices();
   updateStats();
   alert("Рахунок видалено");
 };

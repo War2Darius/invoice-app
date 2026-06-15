@@ -1,5 +1,10 @@
 // ==================== ВІДОБРАЖЕННЯ UI ====================
 
+// Змінні для пагінації
+let currentPage = 1;
+let itemsPerPage = 20;
+let filteredInvoices = [];
+
 function renderStock() {
   const searchTerm = (
     document.getElementById("stock-search")?.value || ""
@@ -19,17 +24,17 @@ function renderStock() {
   container.innerHTML = filtered
     .map(
       (item) => `
-        <div class="list-item">
-            <div class="item-info">
-                <div class="item-title">${escapeHtml(item.name)}</div>
-                <div class="item-sub">Кількість: ${item.qty} шт | Ціна: ${item.price} грн</div>
+            <div class="list-item">
+                <div class="item-info">
+                    <div class="item-title">${escapeHtml(item.name)}</div>
+                    <div class="item-sub">Кількість: ${item.qty} шт | Ціна: ${item.price} грн</div>
+                </div>
+                <div class="item-actions">
+                    <button class="btn btn-sm btn-outline" onclick="window.editStockItem(${item.id})">✏️</button>
+                    <button class="btn btn-sm btn-danger" onclick="window.deleteStockItem(${item.id})">🗑️</button>
+                </div>
             </div>
-            <div class="item-actions">
-                <button class="btn btn-sm btn-outline" onclick="window.editStockItem(${item.id})">✏️</button>
-                <button class="btn btn-sm btn-danger" onclick="window.deleteStockItem(${item.id})">🗑️</button>
-            </div>
-        </div>
-    `,
+        `,
     )
     .join("");
 }
@@ -55,17 +60,17 @@ function renderCustomers() {
   container.innerHTML = filtered
     .map(
       (c) => `
-        <div class="list-item">
-            <div class="item-info">
-                <div class="item-title">${escapeHtml(c.name)}</div>
-                <div class="item-sub">${c.type || "ФОП"} | ${c.phone || "без тел."}</div>
+            <div class="list-item">
+                <div class="item-info">
+                    <div class="item-title">${escapeHtml(c.name)}</div>
+                    <div class="item-sub">${c.type || "ФОП"} | ${c.phone || "без тел."}</div>
+                </div>
+                <div class="item-actions">
+                    <button class="btn btn-sm btn-outline" onclick="window.editCustomer(${c.id})">✏️</button>
+                    <button class="btn btn-sm btn-danger" onclick="window.deleteCustomer(${c.id})">🗑️</button>
+                </div>
             </div>
-            <div class="item-actions">
-                <button class="btn btn-sm btn-outline" onclick="window.editCustomer(${c.id})">✏️</button>
-                <button class="btn btn-sm btn-danger" onclick="window.deleteCustomer(${c.id})">🗑️</button>
-            </div>
-        </div>
-    `,
+        `,
     )
     .join("");
 }
@@ -79,22 +84,139 @@ function renderRecentInvoices() {
     return;
   }
   container.innerHTML = recent
-    .map(
-      (inv) => `
-        <div class="list-item">
-            <div class="item-info">
-                <div class="item-title">Рахунок № ${inv.number} від ${inv.date}</div>
-                <div class="item-sub">${inv.customer?.name || "Невідомий покупець"} | ${inv.totalWithDiscount} грн</div>
+    .map((inv) => {
+      const pdfButton =
+        inv.hasInvoice !== false
+          ? `<button class="btn btn-sm btn-outline" onclick="window.viewInvoicePdf(${inv.id})">📄 PDF</button>`
+          : "";
+      return `
+            <div class="list-item">
+                <div class="item-info">
+                    <div class="item-title">Рахунок № ${inv.number} від ${inv.date}</div>
+                    <div class="item-sub">${inv.customer?.name || "Невідомий покупець"} | ${inv.totalWithDiscount} грн</div>
+                    <div class="item-sub" style="font-size: 10px;">${inv.hasInvoice !== false ? "📄 З квитанцією" : "📦 Без квитанції"}</div>
+                </div>
+                <div class="item-actions">
+                    ${pdfButton}
+                    <button class="btn btn-sm btn-outline" onclick="window.editInvoice(${inv.id})">✏️</button>
+                    <button class="btn btn-sm btn-danger" onclick="window.deleteInvoice(${inv.id})">🗑️</button>
+                </div>
             </div>
-            <div class="item-actions">
-                <button class="btn btn-sm btn-outline" onclick="window.viewInvoicePdf(${inv.id})">📄 PDF</button>
-                <button class="btn btn-sm btn-outline" onclick="window.editInvoice(${inv.id})">✏️</button>
-                <button class="btn btn-sm btn-danger" onclick="window.deleteInvoice(${inv.id})">🗑️</button>
-            </div>
-        </div>
-    `,
-    )
+        `;
+    })
     .join("");
+}
+
+// Оновлена функція з пагінацією
+function renderAllInvoices() {
+  const container = document.getElementById("all-invoices-list");
+  const paginationContainer = document.getElementById("pagination-controls");
+  if (!container) return;
+
+  const searchTerm = (
+    document.getElementById("all-invoices-search")?.value || ""
+  ).toLowerCase();
+
+  // Фільтруємо рахунки
+  if (searchTerm) {
+    filteredInvoices = allInvoices.filter(
+      (inv) =>
+        inv.number.includes(searchTerm) ||
+        inv.customer?.name.toLowerCase().includes(searchTerm),
+    );
+  } else {
+    filteredInvoices = [...allInvoices];
+  }
+
+  // Розрахунок пагінації
+  const totalItems = filteredInvoices.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+  // Перевірка коректності поточної сторінки
+  if (currentPage > totalPages) currentPage = totalPages;
+  if (currentPage < 1) currentPage = 1;
+
+  // Отримуємо рахунки для поточної сторінки
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const pageInvoices = filteredInvoices.slice(startIndex, endIndex);
+
+  // Відображення рахунків
+  if (pageInvoices.length === 0) {
+    container.innerHTML = '<div class="list-item">Немає рахунків</div>';
+    if (paginationContainer) paginationContainer.innerHTML = "";
+    return;
+  }
+
+  container.innerHTML = pageInvoices
+    .map((inv) => {
+      const pdfButton =
+        inv.hasInvoice !== false
+          ? `<button class="btn btn-sm btn-outline" onclick="window.viewInvoicePdf(${inv.id})">📄 PDF</button>`
+          : "";
+      return `
+            <div class="list-item">
+                <div class="item-info">
+                    <div class="item-title">Рахунок № ${inv.number} від ${inv.date}</div>
+                    <div class="item-sub">${inv.customer?.name || "Невідомий покупець"} | ${inv.totalWithDiscount} грн</div>
+                    <div class="item-sub" style="font-size: 10px;">${inv.hasInvoice !== false ? "📄 З квитанцією" : "📦 Без квитанції"}</div>
+                </div>
+                <div class="item-actions">
+                    ${pdfButton}
+                    <button class="btn btn-sm btn-outline" onclick="window.editInvoice(${inv.id})">✏️</button>
+                    <button class="btn btn-sm btn-danger" onclick="window.deleteInvoice(${inv.id})">🗑️</button>
+                </div>
+            </div>
+        `;
+    })
+    .join("");
+
+  // Відображення кнопок пагінації
+  if (paginationContainer && totalPages > 1) {
+    paginationContainer.innerHTML = `
+            <div style="display: flex; justify-content: center; gap: 15px; margin-top: 20px; padding: 10px;">
+                <button class="btn btn-sm btn-outline" id="prev-page-btn" ${currentPage === 1 ? 'disabled style="opacity: 0.5;"' : ""}>
+                    ← Попередня
+                </button>
+                <span style="display: flex; align-items: center; font-size: 14px;">
+                    Сторінка ${currentPage} з ${totalPages}
+                </span>
+                <button class="btn btn-sm btn-outline" id="next-page-btn" ${currentPage === totalPages ? 'disabled style="opacity: 0.5;"' : ""}>
+                    Наступна →
+                </button>
+            </div>
+        `;
+
+    // Додаємо обробники подій
+    const prevBtn = document.getElementById("prev-page-btn");
+    const nextBtn = document.getElementById("next-page-btn");
+
+    if (prevBtn && !prevBtn.disabled) {
+      prevBtn.onclick = () => {
+        if (currentPage > 1) {
+          currentPage--;
+          renderAllInvoices();
+        }
+      };
+    }
+
+    if (nextBtn && !nextBtn.disabled) {
+      nextBtn.onclick = () => {
+        if (currentPage < totalPages) {
+          currentPage++;
+          renderAllInvoices();
+        }
+      };
+    }
+  } else if (paginationContainer) {
+    paginationContainer.innerHTML = "";
+  }
+}
+
+// Функція для скидання пагінації при пошуку
+function resetPaginationAndSearch() {
+  currentPage = 1;
+  renderAllInvoices();
 }
 
 async function updateStats() {
