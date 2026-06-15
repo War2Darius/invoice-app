@@ -97,13 +97,22 @@ async function loadStockFromDB() {
 async function saveStockItem(item, id = null) {
   const tx = db.transaction("stock", "readwrite");
   const store = tx.objectStore("stock");
-  if (id) {
-    item.id = parseInt(id);
-    await store.put(item);
-  } else {
-    await store.add(item);
-  }
-  await loadStockFromDB();
+  return new Promise((resolve, reject) => {
+    let request;
+    if (id) {
+      item.id = parseInt(id);
+      request = store.put(item);
+    } else {
+      // Видаляємо id перед додаванням нового товару, щоб autoIncrement працював
+      delete item.id;
+      request = store.add(item);
+    }
+    request.onsuccess = async () => {
+      await loadStockFromDB();
+      resolve();
+    };
+    request.onerror = () => reject(request.error);
+  });
 }
 
 async function deleteStockItemFromDB(id) {
@@ -125,13 +134,22 @@ async function loadCustomersFromDB() {
 async function saveCustomerToDB(customer, id = null) {
   const tx = db.transaction("customers", "readwrite");
   const store = tx.objectStore("customers");
-  if (id) {
-    customer.id = parseInt(id);
-    await store.put(customer);
-  } else {
-    await store.add(customer);
-  }
-  await loadCustomersFromDB();
+  return new Promise((resolve, reject) => {
+    let request;
+    if (id) {
+      customer.id = parseInt(id);
+      request = store.put(customer);
+    } else {
+      // Видаляємо id перед додаванням нового покупця, щоб autoIncrement працював
+      delete customer.id;
+      request = store.add(customer);
+    }
+    request.onsuccess = async () => {
+      await loadCustomersFromDB();
+      resolve();
+    };
+    request.onerror = () => reject(request.error);
+  });
 }
 
 async function deleteCustomerFromDB(id) {
@@ -153,13 +171,21 @@ async function loadInvoicesFromDB() {
 async function saveInvoiceToDB(invoice, isEdit = false, editId = null) {
   const tx = db.transaction("invoices", "readwrite");
   const store = tx.objectStore("invoices");
-  if (isEdit && editId) {
-    invoice.id = editId;
-    await store.put(invoice);
-  } else {
-    await store.add(invoice);
-  }
-  await loadInvoicesFromDB();
+  return new Promise((resolve, reject) => {
+    let request;
+    if (isEdit && editId) {
+      invoice.id = editId;
+      request = store.put(invoice);
+    } else {
+      delete invoice.id;
+      request = store.add(invoice);
+    }
+    request.onsuccess = async () => {
+      await loadInvoicesFromDB();
+      resolve();
+    };
+    request.onerror = () => reject(request.error);
+  });
 }
 
 async function deleteInvoiceFromDB(id) {
