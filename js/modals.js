@@ -70,6 +70,7 @@ function openCustomerModal(editId = null) {
       document.getElementById("customer-type").value = c.type || "";
       document.getElementById("customer-name").value = c.name || "";
       document.getElementById("customer-index").value = c.index || "";
+      document.getElementById("customer-np-branch").value = c.npBranch || "";
       document.getElementById("customer-city").value = c.city || "";
       document.getElementById("customer-street").value = c.street || "";
       document.getElementById("customer-house").value = c.house || "";
@@ -88,6 +89,7 @@ function openCustomerModal(editId = null) {
     document.getElementById("customer-type").value = "";
     document.getElementById("customer-name").value = "";
     document.getElementById("customer-index").value = "";
+    document.getElementById("customer-np-branch").value = "";
     document.getElementById("customer-city").value = "";
     document.getElementById("customer-street").value = "";
     document.getElementById("customer-house").value = "";
@@ -113,6 +115,7 @@ async function saveCustomer() {
       type: document.getElementById("customer-type").value,
       name: document.getElementById("customer-name").value,
       index: document.getElementById("customer-index").value,
+      npBranch: document.getElementById("customer-np-branch").value,
       city: document.getElementById("customer-city").value,
       street: document.getElementById("customer-street").value,
       house: document.getElementById("customer-house").value,
@@ -132,6 +135,28 @@ async function saveCustomer() {
     closeCustomerModal();
     renderCustomers();
     updateStats();
+
+    // Якщо модальне вікно рахунку відкрите — оновлюємо список покупців
+    if (document.getElementById("invoice-modal").classList.contains("active")) {
+      const currentNumber =
+        document.getElementById("invoice-number")?.value || "";
+      const currentDate = document.getElementById("invoice-date")?.value || "";
+      const currentDiscount =
+        parseFloat(document.getElementById("invoice-discount")?.value) || 0;
+      const currentHasPdf =
+        document.getElementById("invoice-has-pdf")?.checked || false;
+      const currentCustomerId =
+        document.getElementById("invoice-customer")?.value || null;
+
+      // Оновлюємо форму з новим списком покупців
+      await renderInvoiceModalForm(
+        currentCustomerId,
+        currentNumber,
+        currentDate,
+        currentDiscount,
+        currentHasPdf,
+      );
+    }
   } catch (err) {
     console.error("Помилка при збереженні покупця:", err);
     alert("❌ Помилка: " + err.message);

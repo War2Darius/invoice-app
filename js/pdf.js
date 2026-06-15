@@ -70,8 +70,8 @@ async function generateInvoicePdf(invoice) {
                 <div style="flex: 1;">
                     <div style="font-weight: bold;">${customer.type ? customer.type + " " : ""}${customer.name || ""}</div>
                     <div>${customerAddress}</div>
-                    <div>ЄДРПОУ ${customer.edrpou || ""}</div>
-                    <div>тел. ${customer.phone || ""}</div>
+                    ${customer.edrpou ? `<div>ЄДРПОУ ${customer.edrpou}</div>` : ""}
+                    ${customer.phone ? `<div>тел. ${customer.phone}</div>` : ""}
                 </div>
             </div>
 

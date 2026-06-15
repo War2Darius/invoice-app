@@ -63,7 +63,7 @@ function renderCustomers() {
             <div class="list-item">
                 <div class="item-info">
                     <div class="item-title">${escapeHtml(c.name)}</div>
-                    <div class="item-sub">${c.type || "ФОП"} | ${c.phone || "без тел."}</div>
+                    <div class="item-sub">${c.type || "ФОП"} | ${c.phone || "без тел."}${c.npBranch ? ` | НП: ${c.npBranch}` : ""}</div>
                 </div>
                 <div class="item-actions">
                     <button class="btn btn-sm btn-outline" onclick="window.editCustomer(${c.id})">✏️</button>
