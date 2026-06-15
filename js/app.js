@@ -86,7 +86,7 @@ function setupEventListeners() {
   // Збереження в модальних вікнах
   document
     .getElementById("saveStockBtn")
-    ?.addEventListener("click", () => saveStockItem());
+    ?.addEventListener("click", () => saveStockItemHandler());
   document
     .getElementById("saveCustomerBtn")
     ?.addEventListener("click", () => saveCustomer());
