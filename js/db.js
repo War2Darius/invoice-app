@@ -95,23 +95,38 @@ async function loadStockFromDB() {
 }
 
 async function saveStockItem(item, id = null) {
-  const tx = db.transaction("stock", "readwrite");
-  const store = tx.objectStore("stock");
   return new Promise((resolve, reject) => {
+    const tx = db.transaction("stock", "readwrite");
+    const store = tx.objectStore("stock");
     let request;
-    if (id) {
-      item.id = parseInt(id);
-      request = store.put(item);
-    } else {
-      // Видаляємо id перед додаванням нового товару, щоб autoIncrement працював
-      delete item.id;
-      request = store.add(item);
+
+    try {
+      if (id) {
+        // Редагування існуючого товару
+        item.id = parseInt(id);
+        request = store.put(item);
+      } else {
+        // Додавання нового товару - ОБОВ'ЯЗКОВО видаляємо id
+        const newItem = { ...item };
+        delete newItem.id;
+        request = store.add(newItem);
+      }
+
+      request.onsuccess = async () => {
+        try {
+          await loadStockFromDB();
+          resolve();
+        } catch (err) {
+          reject(err);
+        }
+      };
+
+      request.onerror = () => {
+        reject(new Error(`IndexedDB помилка: ${request.error}`));
+      };
+    } catch (err) {
+      reject(err);
     }
-    request.onsuccess = async () => {
-      await loadStockFromDB();
-      resolve();
-    };
-    request.onerror = () => reject(request.error);
   });
 }
 
@@ -132,23 +147,36 @@ async function loadCustomersFromDB() {
 }
 
 async function saveCustomerToDB(customer, id = null) {
-  const tx = db.transaction("customers", "readwrite");
-  const store = tx.objectStore("customers");
   return new Promise((resolve, reject) => {
+    const tx = db.transaction("customers", "readwrite");
+    const store = tx.objectStore("customers");
     let request;
-    if (id) {
-      customer.id = parseInt(id);
-      request = store.put(customer);
-    } else {
-      // Видаляємо id перед додаванням нового покупця, щоб autoIncrement працював
-      delete customer.id;
-      request = store.add(customer);
+
+    try {
+      if (id) {
+        customer.id = parseInt(id);
+        request = store.put(customer);
+      } else {
+        const newCustomer = { ...customer };
+        delete newCustomer.id;
+        request = store.add(newCustomer);
+      }
+
+      request.onsuccess = async () => {
+        try {
+          await loadCustomersFromDB();
+          resolve();
+        } catch (err) {
+          reject(err);
+        }
+      };
+
+      request.onerror = () => {
+        reject(new Error(`IndexedDB помилка: ${request.error}`));
+      };
+    } catch (err) {
+      reject(err);
     }
-    request.onsuccess = async () => {
-      await loadCustomersFromDB();
-      resolve();
-    };
-    request.onerror = () => reject(request.error);
   });
 }
 
@@ -169,22 +197,36 @@ async function loadInvoicesFromDB() {
 }
 
 async function saveInvoiceToDB(invoice, isEdit = false, editId = null) {
-  const tx = db.transaction("invoices", "readwrite");
-  const store = tx.objectStore("invoices");
   return new Promise((resolve, reject) => {
+    const tx = db.transaction("invoices", "readwrite");
+    const store = tx.objectStore("invoices");
     let request;
-    if (isEdit && editId) {
-      invoice.id = editId;
-      request = store.put(invoice);
-    } else {
-      delete invoice.id;
-      request = store.add(invoice);
+
+    try {
+      if (isEdit && editId) {
+        invoice.id = editId;
+        request = store.put(invoice);
+      } else {
+        const newInvoice = { ...invoice };
+        delete newInvoice.id;
+        request = store.add(newInvoice);
+      }
+
+      request.onsuccess = async () => {
+        try {
+          await loadInvoicesFromDB();
+          resolve();
+        } catch (err) {
+          reject(err);
+        }
+      };
+
+      request.onerror = () => {
+        reject(new Error(`IndexedDB помилка: ${request.error}`));
+      };
+    } catch (err) {
+      reject(err);
     }
-    request.onsuccess = async () => {
-      await loadInvoicesFromDB();
-      resolve();
-    };
-    request.onerror = () => reject(request.error);
   });
 }
 
