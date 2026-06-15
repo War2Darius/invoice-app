@@ -92,6 +92,25 @@
             </div>
         </div>
 
+        <!-- НОВА СТОРІНКА: ВСІ РАХУНКИ -->
+        <div id="all-invoices" class="page">
+            <div class="card">
+                <div class="flex-between">
+                    <h2>📋 Всі рахунки</h2>
+                </div>
+                <div class="search-box">
+                    <input
+                        type="text"
+                        id="all-invoices-search"
+                        placeholder="🔍 Пошук за номером або покупцем..."
+                        onkeyup="resetPaginationAndSearch()"
+                    />
+                </div>
+                <div id="all-invoices-list"></div>
+                <div id="pagination-controls"></div>
+            </div>
+        </div>
+
         <div id="profile" class="page">
             <div class="card">
                 <h2>👤 Профіль продавця</h2>
@@ -196,6 +215,8 @@
                             placeholder="Мобільний телефон"
                         />
                     </div>
+
+                    <!-- Підпис -->
                     <div class="form-group">
                         <label>🖊️ Підпис (PNG файл)</label>
                         <div
@@ -242,9 +263,10 @@
                                 margin-top: 4px;
                             "
                         >
-                            PNG файл з прозорим фоном, розміром ~150×50 пікселів
+                            PNG файл з прозорим фоном
                         </div>
                     </div>
+
                     <button type="button" class="btn" id="saveProfileBtn">
                         💾 Зберегти
                     </button>
@@ -394,7 +416,7 @@
             </div>
         </div>
 
-        <!-- НИЖНЯ НАВІГАЦІЯ -->
+        <!-- НИЖНЯ НАВІГАЦІЯ (5 вкладок) -->
         <div class="bottom-nav">
             <button class="nav-item active" data-page="home">
                 <span class="nav-icon">🏠</span>
@@ -407,6 +429,10 @@
             <button class="nav-item" data-page="customers">
                 <span class="nav-icon">👥</span>
                 <span>База</span>
+            </button>
+            <button class="nav-item" data-page="all-invoices">
+                <span class="nav-icon">📋</span>
+                <span>Рахунки</span>
             </button>
             <button class="nav-item" data-page="profile">
                 <span class="nav-icon">👤</span>
@@ -591,11 +617,11 @@
         <!-- Підключення скриптів (порядок важливий!) -->
         <script src="js/utils.js?v=2"></script>
         <script src="js/db.js?v=2"></script>
-        <script src="js/pdf.js?v=3"></script>
-        <script src="js/ui.js?v=2"></script>
+        <script src="js/ui.js?v=3"></script>
         <script src="js/modals.js?v=2"></script>
-        <script src="js/invoice.js?v=2"></script>
+        <script src="js/invoice.js?v=3"></script>
+        <script src="js/pdf.js?v=3"></script>
         <script src="js/backup.js?v=2"></script>
-        <script src="js/app.js?v=2"></script>
+        <script src="js/app.js?v=3"></script>
     </body>
 </html>
