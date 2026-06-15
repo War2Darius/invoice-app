@@ -26,7 +26,7 @@ function closeStockModal() {
   document.getElementById("stock-modal").classList.remove("active");
 }
 
-async function saveStockItem() {
+async function saveStockItemHandler() {
   try {
     const id = document.getElementById("stock-id").value;
     const item = {
@@ -40,8 +40,8 @@ async function saveStockItem() {
     }
     await saveStockItem(item, id || null);
     closeStockModal();
-    await renderStock();
-    await updateStats();
+    renderStock();
+    updateStats();
   } catch (err) {
     console.error("Помилка при збереженні товару:", err);
     alert("❌ Помилка: " + err.message);
