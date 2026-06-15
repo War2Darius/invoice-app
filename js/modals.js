@@ -26,21 +26,26 @@ function closeStockModal() {
   document.getElementById("stock-modal").classList.remove("active");
 }
 
-async function handleSaveStockItem() {
-  const id = document.getElementById("stock-id").value;
-  const item = {
-    name: document.getElementById("stock-name").value,
-    qty: parseInt(document.getElementById("stock-qty").value) || 0,
-    price: parseFloat(document.getElementById("stock-price").value) || 0,
-  };
-  if (!item.name) {
-    alert("Введіть назву товару");
-    return;
+async function saveStockItem() {
+  try {
+    const id = document.getElementById("stock-id").value;
+    const item = {
+      name: document.getElementById("stock-name").value,
+      qty: parseInt(document.getElementById("stock-qty").value) || 0,
+      price: parseFloat(document.getElementById("stock-price").value) || 0,
+    };
+    if (!item.name) {
+      alert("Введіть назву товару");
+      return;
+    }
+    await saveStockItem(item, id || null);
+    closeStockModal();
+    await renderStock();
+    await updateStats();
+  } catch (err) {
+    console.error("Помилка при збереженні товару:", err);
+    alert("❌ Помилка: " + err.message);
   }
-  await saveStockItem(item, id || null);
-  closeStockModal();
-  renderStock();
-  updateStats();
 }
 
 window.editStockItem = function (id) {
@@ -102,30 +107,35 @@ function closeCustomerModal() {
 }
 
 async function saveCustomer() {
-  const id = document.getElementById("customer-id").value;
-  const customer = {
-    type: document.getElementById("customer-type").value,
-    name: document.getElementById("customer-name").value,
-    index: document.getElementById("customer-index").value,
-    city: document.getElementById("customer-city").value,
-    street: document.getElementById("customer-street").value,
-    house: document.getElementById("customer-house").value,
-    region: document.getElementById("customer-region").value,
-    country: document.getElementById("customer-country").value,
-    edrpou: document.getElementById("customer-edrpou").value,
-    iban: document.getElementById("customer-iban").value,
-    bank: document.getElementById("customer-bank").value,
-    mfo: document.getElementById("customer-mfo").value,
-    phone: document.getElementById("customer-phone").value,
-  };
-  if (!customer.name) {
-    alert("Введіть назву або ПІБ покупця");
-    return;
+  try {
+    const id = document.getElementById("customer-id").value;
+    const customer = {
+      type: document.getElementById("customer-type").value,
+      name: document.getElementById("customer-name").value,
+      index: document.getElementById("customer-index").value,
+      city: document.getElementById("customer-city").value,
+      street: document.getElementById("customer-street").value,
+      house: document.getElementById("customer-house").value,
+      region: document.getElementById("customer-region").value,
+      country: document.getElementById("customer-country").value,
+      edrpou: document.getElementById("customer-edrpou").value,
+      iban: document.getElementById("customer-iban").value,
+      bank: document.getElementById("customer-bank").value,
+      mfo: document.getElementById("customer-mfo").value,
+      phone: document.getElementById("customer-phone").value,
+    };
+    if (!customer.name) {
+      alert("Введіть назву або ПІБ покупця");
+      return;
+    }
+    await saveCustomerToDB(customer, id || null);
+    closeCustomerModal();
+    renderCustomers();
+    updateStats();
+  } catch (err) {
+    console.error("Помилка при збереженні покупця:", err);
+    alert("❌ Помилка: " + err.message);
   }
-  await saveCustomerToDB(customer, id || null);
-  closeCustomerModal();
-  renderCustomers();
-  updateStats();
 }
 
 window.editCustomer = function (id) {
