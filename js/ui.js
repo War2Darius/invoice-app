@@ -219,7 +219,7 @@ function resetPaginationAndSearch() {
   renderAllInvoices();
 }
 
-async function updateStats() {
+function updateStats() {
   const stockTotalQty = stockList.reduce((s, i) => s + (i.qty || 0), 0);
   const stockTypes = stockList.length;
   const customersCount = customerList.length;

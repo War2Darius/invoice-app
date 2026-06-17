@@ -257,16 +257,17 @@ async function updateStockAfterInvoice(items, isReturn = false) {
 async function saveSignatureFile(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = async (e) => {
+    reader.onload = (e) => {
       const base64 = e.target.result;
       const tx = db.transaction("signature", "readwrite");
       const store = tx.objectStore("signature");
-      await store.put({
+      const request = store.put({
         id: "signature",
         data: base64,
         updatedAt: new Date().toISOString(),
       });
-      resolve(base64);
+      request.onsuccess = () => resolve(base64);
+      request.onerror = () => reject(request.error);
     };
     reader.onerror = () => reject("Помилка читання файлу");
     reader.readAsDataURL(file);

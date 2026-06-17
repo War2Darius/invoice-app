@@ -78,8 +78,14 @@ function detectDataType(data) {
     return "stock";
   }
 
-  // Перевірка на customers (поле name)
-  if (firstItem && "name" in firstItem && !("qty" in firstItem)) {
+  // Перевірка на customers (поля name + phone або edrpou, без qty та items)
+  if (
+    firstItem &&
+    "name" in firstItem &&
+    !("qty" in firstItem) &&
+    !("items" in firstItem) &&
+    ("phone" in firstItem || "edrpou" in firstItem)
+  ) {
     return "customers";
   }
 
@@ -244,15 +250,10 @@ async function clearAllData() {
 
   if (!confirm1) return;
 
-  // Друге підтвердження (для безпеки)
-  const confirm2 = confirm(
-    "❗ Підтвердіть ОЧИЩЕННЯ ВСІХ ДАНИХ ще раз.\n\n" +
-      'Введіть слово "ОЧИСТИТИ" в поле нижче:',
+  // Друге підтвердження: введення ключового слова
+  const userInput = prompt(
+    '❗ Для підтвердження очищення введіть слово "ОЧИСТИТИ":',
   );
-
-  if (!confirm2) return;
-
-  const userInput = prompt('Введіть слово "ОЧИСТИТИ" для підтвердження:');
   if (userInput !== "ОЧИСТИТИ") {
     alert("Очищення скасовано. Введено неправильне слово.");
     return;

@@ -272,14 +272,27 @@ async function saveInvoice() {
       hasInvoice: generatePdf,
     };
 
-    // Списуємо товари
-    await updateStockAfterInvoice(currentInvoiceItems, false);
-
+    // Зберігаємо рахунок СПОЧАТКУ (якщо збереження впаде — товари не чіпаємо)
     await saveInvoiceToDB(
       invoice,
       !!currentEditingInvoiceId,
       currentEditingInvoiceId,
     );
+
+    // Тільки після успішного збереження — списуємо товари
+    try {
+      await updateStockAfterInvoice(currentInvoiceItems, false);
+    } catch (stockErr) {
+      // Якщо списання не вдалось — видаляємо щойно збережений рахунок (rollback)
+      console.error("Помилка списання товарів, відкатуємо рахунок:", stockErr);
+      await loadInvoicesFromDB();
+      const savedInvoice = allInvoices.find(
+        (i) => i.number === invoice.number && i.date === invoice.date,
+      );
+      if (savedInvoice) await deleteInvoiceFromDB(savedInvoice.id);
+      throw new Error("Помилка списання товарів: " + stockErr.message);
+    }
+
     await loadInvoicesFromDB();
     renderRecentInvoices();
     renderAllInvoices();

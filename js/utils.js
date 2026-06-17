@@ -13,6 +13,7 @@ function escapeHtml(str) {
 }
 
 function numberToWords(num) {
+  num = Math.round(num); // Округлюємо, щоб уникнути помилок з дробовими числами
   const units = [
     "",
     "одна",
