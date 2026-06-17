@@ -11,7 +11,6 @@ const urlsToCache = [
   "./js/pdf.js",
   "./js/utils.js",
   "./js/backup.js",
-  "./js/signature.js",
   "./manifest.json",
 ];
 
