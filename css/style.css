@@ -223,7 +223,14 @@ button:active {
     margin: 20px auto;
     max-height: 85vh;
     overflow-y: auto;
+    overscroll-behavior: contain;
     padding: 20px;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+}
+
+.modal-content::-webkit-scrollbar {
+    display: none; /* Chrome/Safari/Opera */
 }
 
 .modal-header {
@@ -349,19 +356,4 @@ button:active {
 
 .pdf-template th {
     background: #f0e6e0;
-}
-.modal-content {
-    overflow-y: auto;
-    overscroll-behavior: contain;
-}
-
-/* Прибрати скролбар, але залишити можливість скролити */
-.modal-content {
-    overflow-y: auto;
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE/Edge */
-}
-
-.modal-content::-webkit-scrollbar {
-    display: none; /* Chrome/Safari/Opera */
 }
