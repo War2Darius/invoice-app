@@ -73,13 +73,10 @@ async function generateInvoicePdf(invoice) {
                 <div style="flex: 1;">
                     <div style="font-weight: bold;">${customer.type ? escapeHtml(customer.type) + " " : ""}${escapeHtml(customer.name || "")}</div>
                     ${customerAddress ? `<div>${escapeHtml(customerAddress)}</div>` : ""}
-                    ${customer.edrpou ? `<div>ЄДРПОУ ${escapeHtml(customer.edrpou)}</div>` : ""}
+                    ${customer.edrpou ? `<div>РНОКПП/ЄДРПОУ ${escapeHtml(customer.edrpou)}</div>` : ""}
+                    ${customer.iban || customer.account ? `<div>IBAN ${escapeHtml(customer.iban || customer.account)}</div>` : ""}
+                    ${customer.bank || customer.mfo ? `<div>${customer.bank ? "Банк " + escapeHtml(customer.bank) : ""}${customer.bank && customer.mfo ? ", " : ""}${customer.mfo ? "МФО " + escapeHtml(customer.mfo) : ""}</div>` : ""}
                     ${customer.phone ? `<div>тел. ${escapeHtml(customer.phone)}</div>` : ""}
-                    ${customer.email ? `<div>e-mail: ${escapeHtml(customer.email)}</div>` : ""}
-                    ${customer.contactPerson || customer.contact ? `<div>Контакт: ${escapeHtml(customer.contactPerson || customer.contact)}</div>` : ""}
-                    ${customer.iban || customer.account ? `<div>Рахунок/IBAN: ${escapeHtml(customer.iban || customer.account)}</div>` : ""}
-                    ${customer.bank ? `<div>Банк: ${escapeHtml(customer.bank)}</div>` : ""}
-                    ${customer.mfo ? `<div>МФО: ${escapeHtml(customer.mfo)}</div>` : ""}
                 </div>
             </div>
 
