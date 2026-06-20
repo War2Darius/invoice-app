@@ -10,6 +10,9 @@ async function generateInvoicePdf(invoice) {
 
   const customer = invoice.customer;
 
+  // DEBUG: покажемо структуру customer для швидкої діагностики
+  console.log("generateInvoicePdf — invoice.customer:", customer);
+
   // Формування повної адреси постачальника (ОДНИМ РЯДКОМ)
   const sellerAddressFull = [
     seller.index,
@@ -21,15 +24,15 @@ async function generateInvoicePdf(invoice) {
   ].filter((p) => p && p.trim());
   const sellerAddress = sellerAddressFull.join(", ");
 
-  // Формування повної адреси покупця (ОДНИМ РЯДКОМ)
+  // Формування повної адреси покупця (ОДНИМ РЯДКОМ) з невеликими fallback-ключами
   const customerAddressFull = [
-    customer.index,
-    customer.city,
-    customer.street,
-    customer.house,
-    customer.region,
-    customer.country,
-  ].filter((p) => p && p.trim());
+    customer.index || customer.postalCode || customer.zip || "",
+    customer.city || customer.town || "",
+    customer.street || "",
+    customer.house || customer.building || "",
+    customer.region || "",
+    customer.country || "",
+  ].filter((p) => p && String(p).trim());
   const customerAddress = customerAddressFull.join(", ");
 
   const totalWords = numberToWords(invoice.totalWithDiscount);
@@ -68,10 +71,15 @@ async function generateInvoicePdf(invoice) {
             <div style="display: flex; margin-bottom: 25px;">
                 <div style="width: ${leftColumnWidth}px; font-weight: bold; text-align: right; padding-right: 15px;">Одержувач</div>
                 <div style="flex: 1;">
-                    <div style="font-weight: bold;">${customer.type ? customer.type + " " : ""}${customer.name || ""}</div>
-                    <div>${customerAddress}</div>
-                    ${customer.edrpou ? `<div>ЄДРПОУ ${customer.edrpou}</div>` : ""}
-                    ${customer.phone ? `<div>тел. ${customer.phone}</div>` : ""}
+                    <div style="font-weight: bold;">${customer.type ? escapeHtml(customer.type) + " " : ""}${escapeHtml(customer.name || "")}</div>
+                    ${customerAddress ? `<div>${escapeHtml(customerAddress)}</div>` : ""}
+                    ${customer.edrpou ? `<div>ЄДРПОУ ${escapeHtml(customer.edrpou)}</div>` : ""}
+                    ${customer.phone ? `<div>тел. ${escapeHtml(customer.phone)}</div>` : ""}
+                    ${customer.email ? `<div>e-mail: ${escapeHtml(customer.email)}</div>` : ""}
+                    ${customer.contactPerson || customer.contact ? `<div>Контакт: ${escapeHtml(customer.contactPerson || customer.contact)}</div>` : ""}
+                    ${customer.iban || customer.account ? `<div>Рахунок/IBAN: ${escapeHtml(customer.iban || customer.account)}</div>` : ""}
+                    ${customer.bank ? `<div>Банк: ${escapeHtml(customer.bank)}</div>` : ""}
+                    ${customer.mfo ? `<div>МФО: ${escapeHtml(customer.mfo)}</div>` : ""}
                 </div>
             </div>
 
